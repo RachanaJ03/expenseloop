@@ -1,13 +1,17 @@
-import { Moon, Sun, Wallet } from "lucide-react";
+import { Moon, Sun, Wallet, User } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useStore } from "@/lib/store";
 import { CURRENCIES } from "@/lib/currencies";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
 export function Header() {
-  const { currency, setCurrency, theme, toggleTheme } = useStore();
+  const { currency, setCurrency, theme, toggleTheme, profile } = useStore();
+  const initials = (profile.displayName || "U")
+    .split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase();
   return (
     <header className="sticky top-0 z-30 glass">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
@@ -33,6 +37,16 @@ export function Header() {
           </Select>
           <Button variant="outline" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button asChild variant="outline" size="icon" aria-label="Profile">
+            <Link to="/profile">
+              <Avatar className="h-7 w-7">
+                {profile.avatar && <AvatarImage src={profile.avatar} alt="" />}
+                <AvatarFallback className="text-xs bg-gradient-hero text-primary-foreground">
+                  {profile.displayName ? initials : <User className="h-3.5 w-3.5" />}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           </Button>
         </div>
       </div>
