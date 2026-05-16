@@ -4,13 +4,24 @@ import type { Transaction } from "./expense-types";
 const TX_KEY = "expense-tracker:transactions";
 const CUR_KEY = "expense-tracker:currency";
 const THEME_KEY = "expense-tracker:theme";
+const PROFILE_KEY = "expense-tracker:profile";
+
+export interface Profile {
+  displayName: string;
+  avatar: string; // data URL
+  language: string;
+}
+
+const DEFAULT_PROFILE: Profile = { displayName: "", avatar: "", language: "en" };
 
 interface StoreCtx {
   transactions: Transaction[];
   currency: string;
   theme: "light" | "dark";
+  profile: Profile;
   setCurrency: (c: string) => void;
   toggleTheme: () => void;
+  updateProfile: (p: Partial<Profile>) => void;
   addTransaction: (t: Omit<Transaction, "id">) => void;
   updateTransaction: (id: string, t: Partial<Transaction>) => void;
   deleteTransaction: (id: string) => void;
@@ -33,12 +44,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currency, setCurrencyState] = useState<string>("USD");
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setTransactions(readLS<Transaction[]>(TX_KEY, []));
     setCurrencyState(readLS<string>(CUR_KEY, "USD"));
     setTheme(readLS<"light" | "dark">(THEME_KEY, "dark"));
+    setProfile({ ...DEFAULT_PROFILE, ...readLS<Partial<Profile>>(PROFILE_KEY, {}) });
     setHydrated(true);
   }, []);
 
@@ -48,6 +61,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hydrated) localStorage.setItem(CUR_KEY, JSON.stringify(currency));
   }, [currency, hydrated]);
+  useEffect(() => {
+    if (hydrated) localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  }, [profile, hydrated]);
   useEffect(() => {
     if (!hydrated) return;
     localStorage.setItem(THEME_KEY, JSON.stringify(theme));
@@ -65,6 +81,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
   const clearAll = useCallback(() => setTransactions([]), []);
   const toggleTheme = useCallback(() => setTheme((t) => (t === "dark" ? "light" : "dark")), []);
+  const updateProfile = useCallback((p: Partial<Profile>) => {
+    setProfile((prev) => ({ ...prev, ...p }));
+  }, []);
 
   return (
     <Ctx.Provider
@@ -72,8 +91,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         transactions,
         currency,
         theme,
+        profile,
         setCurrency: setCurrencyState,
         toggleTheme,
+        updateProfile,
         addTransaction,
         updateTransaction,
         deleteTransaction,
