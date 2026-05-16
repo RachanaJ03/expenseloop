@@ -6,6 +6,7 @@ import { StatCards } from "@/components/expense/StatCards";
 import { TransactionForm } from "@/components/expense/TransactionForm";
 import { TransactionList } from "@/components/expense/TransactionList";
 import { Charts } from "@/components/expense/Charts";
+import { AIInsights } from "@/components/expense/AIInsights";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/")({
@@ -40,6 +41,7 @@ function Index() {
 
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <div className="space-y-6 min-w-0">
+              <AIInsights />
               <Charts />
               <Card className="p-5">
                 <h3 className="font-display font-semibold mb-4">Recent Transactions</h3>
